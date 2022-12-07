@@ -27,7 +27,7 @@ public class StartSparkPOC {
 
         SparkSession spark = SparkSession.builder()
                 .appName(appName)
-                .master(addressCluster)
+                .master("emr".equals(addressCluster.toLowerCase())? null: addressCluster)
                 //.config("spark.sql.warehouse.dir",warehouseLocation)
                 .getOrCreate();
 
