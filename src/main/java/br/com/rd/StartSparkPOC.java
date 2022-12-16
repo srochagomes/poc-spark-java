@@ -18,6 +18,7 @@ public class StartSparkPOC {
             System.out.println("aplicationName = nome da aplicação");
             System.out.println("address-spark-cluster = endereço do cluster spark passando o protocolo ex.: spark:\\address:7077");
             System.out.println("address-dataset-csv =  Endereço do csv para processamento");
+            System.out.println("url-location =  Localização base S3");
             System.out.println("access-key =  Chave de acesso ao serviço S3");
             System.out.println("secret-key =  secret de acesso ao serviço S3");
             return;
@@ -29,13 +30,13 @@ public class StartSparkPOC {
         String secretKeyS3 = null;
         String urlLocation = null;
         if (args.length>3){
-            accessKeyS3 = args[3];
+            urlLocation = args[3];
         }
         if (args.length>4){
-            secretKeyS3 = args[4];
+            accessKeyS3 = args[4];
         }
         if (args.length>5){
-            urlLocation = args[5];
+            secretKeyS3 = args[5];
         }
 
 
@@ -46,7 +47,7 @@ public class StartSparkPOC {
         System.out.println("Cluster address:"+addressCluster);
         System.out.println("Dataset address:"+dataSetPath);
 
-        var sparkConf = new SparkConf().setAppName("beneficiary-load-process")
+        var   = new SparkConf().setAppName("beneficiary-load-process")
                 .setMaster("emr".equals(addressCluster.toLowerCase())? null: addressCluster)
                 .setAppName(appName)
 //                .set("spark.driver.allowMultipleContexts","true")
