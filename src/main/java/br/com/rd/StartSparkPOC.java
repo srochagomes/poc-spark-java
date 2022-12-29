@@ -4,42 +4,23 @@ import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
+import org.apache.spark.sql.SaveMode;
 import org.apache.spark.sql.SparkSession;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 public class StartSparkPOC {
 
     public static void main(String[] args) {
-        System.out.println("Iniciando a aplicação para a POC Apache Spark");
-        if (args.length<3){
-            System.out.println("Não foram passados todos os parametros");
-            System.out.println("executar: javaSparkContext -jar SparkPOC.jar 'aplicationName' 'address-spark-cluster' 'address-dataset-csv' ");
-            System.out.println("aplicationName = nome da aplicação");
-            System.out.println("address-spark-cluster = endereço do cluster spark passando o protocolo ex.: spark:\\address:7077");
-            System.out.println("address-dataset-csv =  Endereço do csv para processamento");
-            System.out.println("url-location =  Localização base S3");
-            System.out.println("access-key =  Chave de acesso ao serviço S3");
-            System.out.println("secret-key =  secret de acesso ao serviço S3");
-            return;
-        }
-        String appName = args[0];
-        String addressCluster = args[1];
-        String dataSetPath = args[2];
-        String accessKeyS3 = null;
-        String secretKeyS3 = null;
-        String urlLocation = null;
-        if (args.length>3){
-            urlLocation = args[3];
-        }
-        if (args.length>4){
-            accessKeyS3 = args[4];
-        }
-        if (args.length>5){
-            secretKeyS3 = args[5];
-        }
 
-
+        String appName = "Sparc POC";
+        String addressCluster = "emr";
+//        String dataSetPath = "s3a://s3-emr-spark-dev/dados.csv";
+//        String urlLocation = "s3a://s3-emr-spark-dev";
+        String dataSetPath = "s3a://s3-emr-univers-spark-dev/dados.csv";
+        String urlLocation = "s3a://s3-emr-univers-spark-dev";
 
 
         System.out.println("Processo configurado com:");
@@ -47,27 +28,11 @@ public class StartSparkPOC {
         System.out.println("Cluster address:"+addressCluster);
         System.out.println("Dataset address:"+dataSetPath);
 
-        var   = new SparkConf().setAppName("beneficiary-load-process")
-                .setMaster("emr".equals(addressCluster.toLowerCase())? null: addressCluster)
-                .setAppName(appName)
-//                .set("spark.driver.allowMultipleContexts","true")
-//                .set("spark.shuffle.service.enabled", "false")
-//                .set("spark.dynamicAllocation.enabled", "false")
-                ;
+        SparkConf sparkConf = new SparkConf().setAppName("beneficiary-load-process")
 
-        var javaSparkContext = new JavaSparkContext(sparkConf);
-        javaSparkContext.hadoopConfiguration()
-                .set("fs.s3a.connection.maximum", "10");
+                .setAppName(appName);
 
-        if (Objects.nonNull(accessKeyS3)){
-            javaSparkContext.hadoopConfiguration()
-                    .set("fs.s3a.access.key", accessKeyS3);
-        }
-
-        if (Objects.nonNull(secretKeyS3)){
-            javaSparkContext.hadoopConfiguration()
-                    .set("fs.s3a.secret.key", secretKeyS3);
-        }
+        JavaSparkContext javaSparkContext = new JavaSparkContext(sparkConf);
 
         if (Objects.nonNull(urlLocation)){
             javaSparkContext.hadoopConfiguration()
@@ -76,9 +41,16 @@ public class StartSparkPOC {
                     .set("spark.sql.warehouse.dir", urlLocation);
         }
 
+//        javaSparkContext.hadoopConfiguration()
+//                .set("fs.s3a.access.key", "AKIAYEQDT6MIWPJFQJ4C");
+//        javaSparkContext.hadoopConfiguration()
+//                .set("fs.s3a.secret.key", "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");
+//        javaSparkContext.hadoopConfiguration()
+//                .set("fs.s3a.endpoint", "s3.us-east-1.amazonaws.com");
 
         SparkSession spark = SparkSession.builder()
                 .sparkContext(javaSparkContext.sc())
+                .enableHiveSupport()
                 .getOrCreate();
 
         Dataset<Row> dataset = spark.read()
@@ -90,10 +62,24 @@ public class StartSparkPOC {
 
         System.out.println("====================Inicio=====================");
 
+        String data = LocalDateTime.now().format(DateTimeFormatter.ISO_DATE);
+        spark.sql("select * " +
+                " from dados " )
+                .toJSON();
+//                .write().mode(SaveMode.Overwrite)
+//                .json(urlLocation+"/resultado_lista_".concat(data));
+
         spark.sql("select count(*) " +
-                " from dados " ).toJSON().collectAsList().forEach(System.out::println);
+                " from dados " )
+                .toJSON().collectAsList().forEach(System.out::println);
+//                .write().mode(SaveMode.Overwrite)
+//                .json(urlLocation+"/resultado_tamanho_".concat(data));
+
         System.out.println("====================Processamento finalizado=====================");
+
+        javaSparkContext.close();
     }
+
 
 
 }
