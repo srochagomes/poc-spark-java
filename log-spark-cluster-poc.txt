@@ -1,7 +1,0 @@
-Processo configurado com:
-Application name:Sparc POC
-Cluster address:emr
-Dataset address:s3a://s3-emr-spark-dev/dados.csv
-====================Inicio=====================
-{"count(1)":341724}
-====================Processamento finalizado=====================
