@@ -17,8 +17,7 @@ public class StartSparkPOC {
 
         String appName = "Sparc POC";
         String addressCluster = "emr";
-//        String dataSetPath = "s3a://s3-emr-spark-dev/dados.csv";
-//        String urlLocation = "s3a://s3-emr-spark-dev";
+
         String dataSetPath = "s3a://s3-emr-univers-spark-dev/dados.csv";
         String urlLocation = "s3a://s3-emr-univers-spark-dev";
 
@@ -41,12 +40,7 @@ public class StartSparkPOC {
                     .set("spark.sql.warehouse.dir", urlLocation);
         }
 
-//        javaSparkContext.hadoopConfiguration()
-//                .set("fs.s3a.access.key", "AKIAYEQDT6MIWPJFQJ4C");
-//        javaSparkContext.hadoopConfiguration()
-//                .set("fs.s3a.secret.key", "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");
-//        javaSparkContext.hadoopConfiguration()
-//                .set("fs.s3a.endpoint", "s3.us-east-1.amazonaws.com");
+
 
         SparkSession spark = SparkSession.builder()
                 .sparkContext(javaSparkContext.sc())
